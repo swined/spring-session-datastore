@@ -2,9 +2,9 @@ package wtf.the.spring.session.datastore;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Blob;
+import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.EntityValue;
 import com.google.cloud.datastore.Key;
 import org.springframework.session.MapSession;
 import org.springframework.session.SessionRepository;
@@ -49,14 +49,18 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
     public void save(MapSession session) {
         var attrs = Entity.newBuilder();
         for (var attr : session.getAttributeNames()) {
-            attrs.set(attr, Blob.copyFrom(requireNonNull(serialize(session.getAttribute(attr)))));
+            attrs.set(attr, BlobValue
+                .newBuilder(Blob.copyFrom(requireNonNull(serialize(session.getAttribute(attr)))))
+                .setExcludeFromIndexes(true)
+                .build()
+            );
         }
         datastore.put(Entity
             .newBuilder(key(session.getId()))
             .set("ctime", toDatastore(session.getCreationTime()))
             .set("atime", toDatastore(session.getLastAccessedTime()))
             .set("ttl", session.getMaxInactiveInterval().toSeconds())
-            .set("attrs", EntityValue.newBuilder(attrs.build()).setExcludeFromIndexes(true).build())
+            .set("attrs", attrs.build())
             .build()
         );
     }
