@@ -35,4 +35,9 @@ public class DatastoreHttpSessionConfiguration extends SpringHttpSessionConfigur
     public SessionRepository<MapSession> sessionRepository(Datastore datastore) {
         return new DatastoreSessionRepository(datastore, kind, ttl);
     }
+
+    @Bean
+    public DatastoreSessionCleaner sessionCleaner(Datastore datastore) {
+        return new DatastoreSessionCleaner(datastore, kind);
+    }
 }

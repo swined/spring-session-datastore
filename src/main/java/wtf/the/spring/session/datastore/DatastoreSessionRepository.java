@@ -56,6 +56,7 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
             .set("atime", Timestamp.of(Date.from(session.getLastAccessedTime())))
             .set("ttl", session.getMaxInactiveInterval().toSeconds())
             .set("attrs", attrs.build())
+            .set("expire", Timestamp.of(Date.from(session.getLastAccessedTime().plus(session.getMaxInactiveInterval()))))
             .build()
         );
     }
