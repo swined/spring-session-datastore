@@ -82,8 +82,8 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
                 var attrs = entity.getEntity("attrs");
                 for (var attr : attrs.getNames()) {
                     switch (attrs.getValue(attr).getType()) {
-                        case STRING: session.setAttribute(attr, attrs.getString(attr));
-                        case BLOB: session.setAttribute(attr, deserialize(attrs.getBlob(attr).toByteArray()));
+                        case STRING: session.setAttribute(attr, attrs.getString(attr)); break;
+                        case BLOB: session.setAttribute(attr, deserialize(attrs.getBlob(attr).toByteArray())); break;
                         default: throw new UnsupportedOperationException(attrs.getValue(attr).getType().toString());
                     }
                 }
