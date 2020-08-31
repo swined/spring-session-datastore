@@ -7,11 +7,13 @@ import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import org.springframework.session.MapSession;
+import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
 
 import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.SerializationUtils.deserialize;
@@ -42,20 +44,13 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
 
     @Override
     public void save(MapSession session) {
-        var attrs = Entity.newBuilder();
-        for (var attr : session.getAttributeNames()) {
-            attrs.set(attr, BlobValue
-                .newBuilder(Blob.copyFrom(requireNonNull(serialize(session.getAttribute(attr)))))
-                .setExcludeFromIndexes(true)
-                .build()
-            );
-        }
         datastore.put(Entity
             .newBuilder(key(session.getId()))
-            .set("ctime", Timestamp.of(Date.from(session.getCreationTime())))
-            .set("atime", Timestamp.of(Date.from(session.getLastAccessedTime())))
-            .set("ttl", session.getMaxInactiveInterval().toSeconds())
-            .set("attrs", attrs.build())
+            .set("data", BlobValue
+                .newBuilder(Blob.copyFrom(requireNonNull(serialize(session))))
+                .setExcludeFromIndexes(true)
+                .build()
+            )
             .set("expire", Timestamp.of(Date.from(session.getLastAccessedTime().plus(session.getMaxInactiveInterval()))))
             .build()
         );
@@ -65,17 +60,8 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
     public MapSession findById(String id) {
         return Optional
             .ofNullable(datastore.get(key(id)))
-            .map(entity -> {
-                var session = new MapSession(entity.getKey().getName());
-                session.setCreationTime(entity.getTimestamp("ctime").toDate().toInstant());
-                session.setLastAccessedTime(entity.getTimestamp("atime").toDate().toInstant());
-                session.setMaxInactiveInterval(Duration.ofSeconds(entity.getLong("ttl")));
-                var attrs = entity.getEntity("attrs");
-                for (var attr : attrs.getNames()) {
-                    session.setAttribute(attr, deserialize(attrs.getBlob(attr).toByteArray()));
-                }
-                return session;
-            })
+            .map(entity -> (MapSession)deserialize(entity.getBlob("data").toByteArray()))
+            .filter(Predicate.not(Session::isExpired))
             .orElse(null);
     }
 
