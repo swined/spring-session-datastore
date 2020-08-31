@@ -86,7 +86,6 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
                         case BLOB: session.setAttribute(attr, deserialize(attrs.getBlob(attr).toByteArray()));
                         default: throw new UnsupportedOperationException(attrs.getValue(attr).getType().toString());
                     }
-
                 }
                 return session;
             })
