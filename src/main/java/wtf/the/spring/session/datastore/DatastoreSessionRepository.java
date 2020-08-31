@@ -21,10 +21,12 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
 
     private final Datastore datastore;
     private final String kind;
+    private final Duration ttl;
 
-    public DatastoreSessionRepository(Datastore datastore, String kind) {
+    public DatastoreSessionRepository(Datastore datastore, String kind, Duration ttl) {
         this.datastore = requireNonNull(datastore);
         this.kind = requireNonNull(kind);
+        this.ttl = requireNonNull(ttl);
     }
 
     private Key key(String id) {
@@ -33,7 +35,9 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
 
     @Override
     public MapSession createSession() {
-        return new MapSession();
+        var session = new MapSession();
+        session.setMaxInactiveInterval(ttl);
+        return session;
     }
 
     @Override
