@@ -49,16 +49,11 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
     public void save(MapSession session) {
         var attrs = Entity.newBuilder();
         for (var attr : session.getAttributeNames()) {
-            var value = session.getAttribute(attr);
-            if (value instanceof String) {
-                attrs.set(attr, (String)value);
-            } else {
-                attrs.set(attr, BlobValue
-                    .newBuilder(Blob.copyFrom(requireNonNull(serialize(value))))
-                    .setExcludeFromIndexes(true)
-                    .build()
-                );
-            }
+            attrs.set(attr, BlobValue
+                .newBuilder(Blob.copyFrom(requireNonNull(serialize(session.getAttribute(attr)))))
+                .setExcludeFromIndexes(true)
+                .build()
+            );
         }
         datastore.put(Entity
             .newBuilder(key(session.getId()))
@@ -81,11 +76,7 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
                 session.setMaxInactiveInterval(Duration.ofSeconds(entity.getLong("ttl")));
                 var attrs = entity.getEntity("attrs");
                 for (var attr : attrs.getNames()) {
-                    switch (attrs.getValue(attr).getType()) {
-                        case STRING: session.setAttribute(attr, attrs.getString(attr)); break;
-                        case BLOB: session.setAttribute(attr, deserialize(attrs.getBlob(attr).toByteArray())); break;
-                        default: throw new UnsupportedOperationException(attrs.getValue(attr).getType().toString());
-                    }
+                    session.setAttribute(attr, deserialize(attrs.getBlob(attr).toByteArray()));
                 }
                 return session;
             })
