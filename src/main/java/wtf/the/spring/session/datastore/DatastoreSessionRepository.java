@@ -54,9 +54,9 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
                 attrs.set(attr, (String)value);
             } else {
                 attrs.set(attr, BlobValue
-                        .newBuilder(Blob.copyFrom(requireNonNull(serialize(value))))
-                        .setExcludeFromIndexes(true)
-                        .build()
+                    .newBuilder(Blob.copyFrom(requireNonNull(serialize(value))))
+                    .setExcludeFromIndexes(true)
+                    .build()
                 );
             }
         }
