@@ -10,7 +10,6 @@ import org.springframework.session.MapSession;
 import org.springframework.session.SessionRepository;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
@@ -32,14 +31,6 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
         return datastore.newKeyFactory().setKind(kind).newKey(id);
     }
 
-    private static Timestamp toDatastore(Instant instant) {
-        return Timestamp.of(Date.from(instant));
-    }
-
-    private static Instant fromDatastore(Timestamp timestamp) {
-        return timestamp.toDate().toInstant();
-    }
-
     @Override
     public MapSession createSession() {
         return new MapSession();
@@ -57,8 +48,8 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
         }
         datastore.put(Entity
             .newBuilder(key(session.getId()))
-            .set("ctime", toDatastore(session.getCreationTime()))
-            .set("atime", toDatastore(session.getLastAccessedTime()))
+            .set("ctime", Timestamp.of(Date.from(session.getCreationTime())))
+            .set("atime", Timestamp.of(Date.from(session.getLastAccessedTime())))
             .set("ttl", session.getMaxInactiveInterval().toSeconds())
             .set("attrs", attrs.build())
             .build()
@@ -71,8 +62,8 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
             .ofNullable(datastore.get(key(id)))
             .map(entity -> {
                 var session = new MapSession(entity.getKey().getName());
-                session.setCreationTime(fromDatastore(entity.getTimestamp("ctime")));
-                session.setLastAccessedTime(fromDatastore(entity.getTimestamp("atime")));
+                session.setCreationTime(entity.getTimestamp("ctime").toDate().toInstant());
+                session.setLastAccessedTime(entity.getTimestamp("atime").toDate().toInstant());
                 session.setMaxInactiveInterval(Duration.ofSeconds(entity.getLong("ttl")));
                 var attrs = entity.getEntity("attrs");
                 for (var attr : attrs.getNames()) {
