@@ -6,6 +6,7 @@ import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.ValueType;
 import org.springframework.session.MapSession;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
@@ -60,6 +61,7 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
     public MapSession findById(String id) {
         return Optional
             .ofNullable(datastore.get(key(id)))
+            .filter(entity -> entity.contains("data") && entity.getValue("data").getType() == ValueType.BLOB)
             .map(entity -> (MapSession)deserialize(entity.getBlob("data").toByteArray()))
             .filter(Predicate.not(Session::isExpired))
             .orElse(null);
