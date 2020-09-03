@@ -6,8 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.session.MapSession;
-import org.springframework.session.SessionRepository;
 import org.springframework.session.config.annotation.web.http.SpringHttpSessionConfiguration;
 
 import java.time.Duration;
@@ -32,7 +30,7 @@ public class DatastoreHttpSessionConfiguration extends SpringHttpSessionConfigur
     }
 
     @Bean
-    public SessionRepository<MapSession> sessionRepository(Datastore datastore) {
+    public DatastoreSessionRepository sessionRepository(Datastore datastore) {
         return new DatastoreSessionRepository(datastore, kind, ttl);
     }
 
