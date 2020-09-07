@@ -9,6 +9,7 @@ import com.google.cloud.datastore.Key;
 import org.springframework.session.MapSession;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
+import org.springframework.util.SerializationUtils;
 
 import java.time.Duration;
 import java.util.Date;
@@ -16,7 +17,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
-import static org.springframework.util.SerializationUtils.deserialize;
 import static org.springframework.util.SerializationUtils.serialize;
 
 public class DatastoreSessionRepository implements SessionRepository<MapSession> {
@@ -60,7 +60,10 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
     public MapSession findById(String id) {
         return Optional
             .ofNullable(datastore.get(key(id)))
-            .map(entity -> (MapSession)deserialize(entity.getBlob("data").toByteArray()))
+            .map(entity -> entity.getBlob("data").toByteArray())
+            .map(SerializationUtils::deserialize)
+            .filter(MapSession.class::isInstance)
+            .map(MapSession.class::cast)
             .filter(Predicate.not(Session::isExpired))
             .orElse(null);
     }
