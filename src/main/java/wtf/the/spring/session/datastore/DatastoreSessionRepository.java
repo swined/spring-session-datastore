@@ -14,9 +14,9 @@ import org.springframework.util.SerializationUtils;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Predicate.not;
 import static org.springframework.util.SerializationUtils.serialize;
 
 public class DatastoreSessionRepository implements SessionRepository<MapSession> {
@@ -65,7 +65,7 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
             .map(SerializationUtils::deserialize)
             .filter(MapSession.class::isInstance)
             .map(MapSession.class::cast)
-            .filter(Predicate.not(Session::isExpired))
+            .filter(not(Session::isExpired))
             .orElse(null);
     }
 
