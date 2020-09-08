@@ -60,7 +60,8 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
     public MapSession findById(String id) {
         return Optional
             .ofNullable(datastore.get(key(id)))
-            .map(entity -> entity.getBlob("data").toByteArray())
+            .map(entity -> entity.getBlob("data"))
+            .map(Blob::toByteArray)
             .map(SerializationUtils::deserialize)
             .filter(MapSession.class::isInstance)
             .map(MapSession.class::cast)
