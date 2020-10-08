@@ -6,7 +6,6 @@ import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.session.MapSession;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
@@ -36,7 +35,6 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
         return datastore.newKeyFactory().setKind(kind).newKey(id);
     }
 
-    @NewSpan
     @Override
     public MapSession createSession() {
         var session = new MapSession();
@@ -44,7 +42,6 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
         return session;
     }
 
-    @NewSpan
     @Override
     public void save(MapSession session) {
         datastore.put(Entity
@@ -59,7 +56,6 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
         );
     }
 
-    @NewSpan
     @Override
     public MapSession findById(String id) {
         return Optional
@@ -73,7 +69,6 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
             .orElse(null);
     }
 
-    @NewSpan
     @Override
     public void deleteById(String id) {
         datastore.delete(key(id));
