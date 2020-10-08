@@ -4,6 +4,7 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.Query;
+import org.springframework.cloud.sleuth.annotation.NewSpan;
 
 import java.util.ArrayList;
 
@@ -20,6 +21,7 @@ public class DatastoreSessionCleaner {
         this.kind = requireNonNull(kind);
     }
 
+    @NewSpan
     public void clean() {
         var expired = new ArrayList<Key>();
         do {
