@@ -36,7 +36,6 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
         return datastore.newKeyFactory().setKind(kind).newKey(id);
     }
 
-    @NewSpan
     @Override
     public MapSession createSession() {
         var session = new MapSession();
