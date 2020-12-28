@@ -14,7 +14,7 @@ jobs:
         with:
           java-version: 14
       - run: mvn source:jar deploy -DaltDeploymentRepository=internal.repo::default::file://$PWD/target/repo
-      - uses: JamesIves/github-pages-deploy-action@3.5.9
+      - uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           SINGLE_COMMIT: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
