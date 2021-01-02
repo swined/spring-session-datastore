@@ -1,0 +1,29 @@
+steps:
+- name: 'docker'
+  args: ['build', '-t', 'europe-docker.pkg.dev/$PROJECT_ID/tmp/tmp:$BUILD_ID', '.']
+- name: 'docker'
+  args: ['push', 'europe-docker.pkg.dev/$PROJECT_ID/tmp/tmp:$BUILD_ID']
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+  - run
+  - deploy
+  - mvn-ssd
+  - --labels=unit=gcr-mvn-ssd
+  - --image=europe-docker.pkg.dev/$PROJECT_ID/tmp/tmp:$BUILD_ID
+  - --platform=managed
+  - --region=europe-west1
+  - --cpu=1
+  - --memory=1Gi
+  - --allow-unauthenticated
+  - --concurrency=default
+  - --max-instances=default
+  - --project=psychic-waffle
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+  - artifacts
+  - docker
+  - images
+  - delete
+  - europe-docker.pkg.dev/$PROJECT_ID/tmp/tmp
