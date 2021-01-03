@@ -21,9 +21,4 @@ steps:
   - --project=psychic-waffle
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
-  args:
-  - artifacts
-  - docker
-  - images
-  - delete
-  - europe-docker.pkg.dev/$PROJECT_ID/tmp/tmp
+  args: ['artifacts', 'docker', 'images', 'delete', 'europe-docker.pkg.dev/$PROJECT_ID/tmp/tmp']
