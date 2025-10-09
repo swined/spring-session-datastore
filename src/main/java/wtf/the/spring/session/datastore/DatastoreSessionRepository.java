@@ -9,6 +9,7 @@ import com.google.cloud.datastore.Key;
 import org.springframework.session.MapSession;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
+import org.springframework.session.UuidSessionIdGenerator;
 import org.springframework.util.SerializationUtils;
 
 import java.time.Duration;
@@ -65,6 +66,10 @@ public class DatastoreSessionRepository implements SessionRepository<MapSession>
             .map(SerializationUtils::deserialize)
             .filter(MapSession.class::isInstance)
             .map(MapSession.class::cast)
+            .map(session -> {
+                session.setSessionIdGenerator(UuidSessionIdGenerator.getInstance());
+                return session;
+            })
             .filter(not(Session::isExpired))
             .orElse(null);
     }
